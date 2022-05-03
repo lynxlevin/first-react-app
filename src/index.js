@@ -1,22 +1,61 @@
-import React from 'react';
+import React, { useState } from 'react';
 
-import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom/client';
 import './index.css';
 
-const Square = () => {
-    return <button className="square">{/* TODO */}</button>;
+const Square = ({ value, onClick }) => {
+    return (
+        <button className="square" onClick={onClick}>
+            {value}
+        </button>
+    );
 };
 
 const Board = () => {
-    const renderSquare = _i => {
-        return <Square />;
+    const [squares, setSquares] = useState(Array(9).fill(null));
+    const [xIsNext, setXIsNext] = useState(true);
+
+    const handleClick = i => {
+        if (calculateWinner(squares) || squares[i]) return;
+        const clone = [...squares];
+        clone[i] = xIsNext ? 'X' : 'O';
+        setSquares(clone);
+        setXIsNext(!xIsNext);
     };
 
-    const status = 'Next player: X';
+    const renderSquare = i => {
+        return <Square value={squares[i]} onClick={() => handleClick(i)} />;
+    };
+
+    const calculateWinner = squares => {
+        const lines = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+            [0, 4, 8],
+            [2, 4, 6],
+        ];
+        for (const line of lines) {
+            const [a, b, c] = line;
+            if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+                return squares[a];
+            }
+        }
+        return null;
+    };
+
+    const getStatus = () => {
+        const winner = calculateWinner(squares);
+        const status = winner ? `Winner: ${winner}` : `Next player: ${xIsNext ? 'X' : 'O'}`;
+        return status;
+    };
 
     return (
         <div>
-            <div className="status">{status}</div>
+            <div className="status">{getStatus()}</div>
             <div className="board-row">
                 {renderSquare(0)}
                 {renderSquare(1)}
